@@ -17,4 +17,4 @@ import { EmailModule } from '../email/email.module';
   providers: [UsersService, UsersRepository],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

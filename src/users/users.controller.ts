@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
@@ -25,7 +24,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Public()
   @Post('register')
@@ -78,7 +77,10 @@ export class UsersController {
   }
 
   @Patch('update')
-  async updateUser(@Req() req: ExtendedRequest, @Body() updateUserDto: UpdateUserDto) {
+  async updateUser(
+    @Req() req: ExtendedRequest,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.usersService.updateUser(req.user.id, updateUserDto);
   }
 

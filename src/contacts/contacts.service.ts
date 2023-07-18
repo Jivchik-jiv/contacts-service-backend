@@ -10,14 +10,13 @@ export class ContactsService {
   constructor(
     private readonly contactsRepository: ContactsRepository,
     private readonly cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
-  async create(userId: string, createContactDto: CreateContactDto,) {
+  async create(userId: string, createContactDto: CreateContactDto) {
     return await this.contactsRepository.create(createContactDto, userId);
   }
 
   async findAll(userId: string, limit: number, skip: number) {
-
     const count = await this.contactsRepository.countContacts(userId);
 
     const pageTotal = Math.floor((count - 1) / limit) + 1;

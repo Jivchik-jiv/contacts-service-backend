@@ -28,7 +28,7 @@ interface FindAllQuery {
 
 @Controller('contacts')
 export class ContactsController {
-  constructor(private readonly contactsService: ContactsService) { }
+  constructor(private readonly contactsService: ContactsService) {}
 
   @Post()
   async create(
@@ -55,7 +55,7 @@ export class ContactsController {
   async update(
     @Req() req: ExtendedRequest,
     @Param('id') id: string,
-    @Body() updateContactDto: UpdateContactDto
+    @Body() updateContactDto: UpdateContactDto,
   ) {
     return await this.contactsService.update(req.user.id, id, updateContactDto);
   }

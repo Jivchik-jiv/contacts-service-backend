@@ -40,9 +40,11 @@ export class EmailService {
   };
 
   sendEmail = (verifyToken: string, userName: string, email: string) => {
-
     const emailBody = this.#createEmail(verifyToken, userName);
-    console.log("🚀 ~ file: email.service.ts:44 ~ EmailService ~ verifyLink:", `http://localhost:3000/users/verify/${verifyToken}`)
+    console.log(
+      '🚀 ~ file: email.service.ts:44 ~ EmailService ~ verifyLink:',
+      `http://localhost:3000/users/verify/${verifyToken}`,
+    );
 
     const msg = {
       to: email,

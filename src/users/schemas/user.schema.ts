@@ -30,7 +30,7 @@ export class User {
   @Prop({ default: false })
   verified: boolean;
 
-  validatePassword: Function;
+  validatePassword: (password: string) => Promise<boolean>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

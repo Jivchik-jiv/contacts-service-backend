@@ -15,7 +15,7 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly cloudinaryService: CloudinaryService,
     private readonly emailService: EmailService,
-  ) { }
+  ) {}
 
   async register(registerUserDto: RegisterUserDto) {
     const { email, name, password } = registerUserDto;
@@ -30,11 +30,7 @@ export class UsersService {
 
     const verifyToken = nanoid();
     try {
-      await this.emailService.sendEmail(
-        verifyToken,
-        name,
-        email,
-      );
+      await this.emailService.sendEmail(verifyToken, name, email);
     } catch (error) {
       console.log(
         '🚀 ~ file: users.service.ts:32 ~ UsersService ~ register ~ error:',
@@ -58,7 +54,10 @@ export class UsersService {
         true,
       );
     }
-    console.log("🚀 ~ file: users.service.ts:55 ~ UsersService ~ register ~ newUser:", newUser)
+    console.log(
+      '🚀 ~ file: users.service.ts:55 ~ UsersService ~ register ~ newUser:',
+      newUser,
+    );
     return newUser;
   }
 
@@ -108,7 +107,6 @@ export class UsersService {
     const user = await this.usersRepository.findByField({ _id: userId });
 
     if (user) {
-
       const passValid = user.validatePassword(oldPassword);
 
       if (passValid) {

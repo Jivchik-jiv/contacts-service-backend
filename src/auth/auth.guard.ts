@@ -2,7 +2,6 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -18,7 +17,7 @@ export class AuthGuard implements CanActivate {
     private jwtService: JwtService,
     private reflector: Reflector,
     private usersService: UsersService,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -28,8 +27,6 @@ export class AuthGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
-
-
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
@@ -45,7 +42,6 @@ export class AuthGuard implements CanActivate {
       });
 
       user = await this.usersService.findById(payload.id);
-
     } catch (error) {
       throw new UnauthorizedException();
     }
@@ -55,7 +51,7 @@ export class AuthGuard implements CanActivate {
     }
 
     if (!user.verified) {
-      throw new ForbiddenException("Email is not verified");
+      throw new ForbiddenException('Email is not verified');
     }
 
     request['user'] = payload;
@@ -68,4 +64,3 @@ export class AuthGuard implements CanActivate {
     return type === 'Bearer' ? token : undefined;
   }
 }
-

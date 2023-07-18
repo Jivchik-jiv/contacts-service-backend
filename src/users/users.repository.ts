@@ -2,12 +2,15 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
-import { FindUserInterface, RegisterUserExtended, UpdateUserInterface } from './users.entities';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  FindUserInterface,
+  RegisterUserExtended,
+  UpdateUserInterface,
+} from './users.entities';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) { }
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async register(registerUserObj: RegisterUserExtended) {
     const user = await this.userModel.create(registerUserObj);

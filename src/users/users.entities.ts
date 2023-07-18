@@ -11,7 +11,4 @@ export interface FindUserInterface {
   _id: string;
 }
 
-
-export interface UpdateUserInterface extends User {
-
-}
+export type UpdateUserInterface = User;

@@ -9,7 +9,7 @@ import { UpdateContactInterface } from './contacts.entities';
 export class ContactsRepository {
   constructor(
     @InjectModel(Contact.name) private contactModel: Model<Contact>,
-  ) { }
+  ) {}
 
   async create(createContactDto: CreateContactDto, userId: string) {
     const contact = await this.contactModel.create({
@@ -28,7 +28,7 @@ export class ContactsRepository {
   }
 
   async countContacts(userId: string) {
-    return await this.contactModel.countDocuments({ owner: userId })
+    return await this.contactModel.countDocuments({ owner: userId });
   }
 
   async findOne(userId: string, id: string) {
