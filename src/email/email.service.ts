@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as Mailgen from 'mailgen';
 import * as sgMail from '@sendgrid/mail';
+import * as dotenv from 'dotenv';
+dotenv.config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 @Injectable()
@@ -38,8 +40,9 @@ export class EmailService {
   };
 
   sendEmail = (verifyToken: string, userName: string, email: string) => {
+
     const emailBody = this.#createEmail(verifyToken, userName);
-    // console.log("🚀 ~ file: email.service.ts:44 ~ EmailService ~ verifyLink:", `http://localhost:3000/users/verify/${verifyToken}`)
+    console.log("🚀 ~ file: email.service.ts:44 ~ EmailService ~ verifyLink:", `http://localhost:3000/users/verify/${verifyToken}`)
 
     const msg = {
       to: email,

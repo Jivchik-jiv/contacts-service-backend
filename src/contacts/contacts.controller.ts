@@ -19,7 +19,7 @@ import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { ExtendedRequest } from 'src/common/extended-requset.interface';
+import { ExtendedRequest } from '../common/extended-requset.interface';
 
 interface FindAllQuery {
   limit: number;
@@ -28,14 +28,14 @@ interface FindAllQuery {
 
 @Controller('contacts')
 export class ContactsController {
-  constructor(private readonly contactsService: ContactsService) {}
+  constructor(private readonly contactsService: ContactsService) { }
 
   @Post()
   async create(
-    @Body() createContactDto: CreateContactDto,
     @Req() req: ExtendedRequest,
+    @Body() createContactDto: CreateContactDto,
   ) {
-    return await this.contactsService.create(createContactDto, req.user.id);
+    return await this.contactsService.create(req.user.id, createContactDto);
   }
 
   @Get()
@@ -47,15 +47,15 @@ export class ContactsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req: ExtendedRequest) {
+  async findOne(@Req() req: ExtendedRequest, @Param('id') id: string) {
     return await this.contactsService.findOne(req.user.id, id);
   }
 
   @Patch(':id')
   async update(
-    @Param('id') id: string,
-    @Body() updateContactDto: UpdateContactDto,
     @Req() req: ExtendedRequest,
+    @Param('id') id: string,
+    @Body() updateContactDto: UpdateContactDto
   ) {
     return await this.contactsService.update(req.user.id, id, updateContactDto);
   }
@@ -72,6 +72,7 @@ export class ContactsController {
     }),
   )
   async updateAvatar(
+    @Req() req: ExtendedRequest,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -81,7 +82,6 @@ export class ContactsController {
       }),
     )
     avatar: Express.Multer.File,
-    @Req() req: ExtendedRequest,
     @Param('id') id: string,
   ) {
     return await this.contactsService.updateAvatar(req.user.id, id, avatar);
@@ -89,15 +89,15 @@ export class ContactsController {
 
   @Patch(':id/friends')
   async updateFriends(
+    @Req() req: ExtendedRequest,
     @Param('id') id: string,
     @Body('isFriend') isFriend: boolean,
-    @Req() req: ExtendedRequest,
   ) {
     return await this.contactsService.updateFriends(req.user.id, id, isFriend);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: ExtendedRequest) {
+  async remove(@Req() req: ExtendedRequest, @Param('id') id: string) {
     return await this.contactsService.remove(req.user.id, id);
   }
 }

@@ -3,11 +3,11 @@ import { UsersRepository } from './users.repository';
 import { RegisterUserDto } from './dto/register-user.dto';
 import * as gravatar from 'gravatar';
 import { nanoid } from 'nanoid';
-import { hashPassword } from 'src/utils/bcrypt';
-// import { Express } from 'express';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { hashPassword } from '../utils/bcrypt';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as fse from 'fs-extra';
-import { EmailService } from 'src/email/email.service';
+import { EmailService } from '../email/email.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -29,14 +29,12 @@ export class UsersService {
     }
 
     const verifyToken = nanoid();
-    console.log("🚀 ~ file: users.service.ts:32 ~ UsersService ~ register ~ verifyToken:", verifyToken)
     try {
       await this.emailService.sendEmail(
         verifyToken,
         name,
         email,
       );
-
     } catch (error) {
       console.log(
         '🚀 ~ file: users.service.ts:32 ~ UsersService ~ register ~ error:',
@@ -54,12 +52,13 @@ export class UsersService {
     });
 
     if (newUser) {
-      newUser.avatar = gravatar.url(
+      newUser.avatar = await gravatar.url(
         newUser.email,
         { s: '250', d: 'robohash' },
         true,
       );
     }
+    console.log("🚀 ~ file: users.service.ts:55 ~ UsersService ~ register ~ newUser:", newUser)
     return newUser;
   }
 
@@ -109,10 +108,12 @@ export class UsersService {
     const user = await this.usersRepository.findByField({ _id: userId });
 
     if (user) {
+
       const passValid = user.validatePassword(oldPassword);
 
       if (passValid) {
         const hashPass = hashPassword(newPassword);
+
         await this.usersRepository.updateUser(userId, { password: hashPass });
 
         return true;
@@ -126,8 +127,8 @@ export class UsersService {
     await this.usersRepository.updateUser(userId, { token });
   }
 
-  async updateName(userId: string, name: string) {
-    await this.usersRepository.updateUser(userId, { name });
+  async updateUser(userId: string, updateUserDto: UpdateUserDto) {
+    await this.usersRepository.updateUser(userId, { ...updateUserDto });
   }
 
   async verifyUser(verifyToken: string) {

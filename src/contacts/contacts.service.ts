@@ -12,7 +12,7 @@ export class ContactsService {
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
-  async create(createContactDto: CreateContactDto, userId: string) {
+  async create(userId: string, createContactDto: CreateContactDto,) {
     return await this.contactsRepository.create(createContactDto, userId);
   }
 

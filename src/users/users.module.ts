@@ -4,8 +4,8 @@ import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { UsersRepository } from './users.repository';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
-import { EmailModule } from 'src/email/email.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -17,4 +17,4 @@ import { EmailModule } from 'src/email/email.module';
   providers: [UsersService, UsersRepository],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

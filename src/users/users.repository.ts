@@ -2,7 +2,8 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
-import { FindUserInterface, RegisterUserExtended } from './users.entities';
+import { FindUserInterface, RegisterUserExtended, UpdateUserInterface } from './users.entities';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -25,7 +26,7 @@ export class UsersRepository {
     return result;
   }
 
-  async updateUser(id: string, updateObj: any) {
+  async updateUser(id: string, updateObj: Partial<UpdateUserInterface>) {
     const user = await this.userModel.findByIdAndUpdate(id, updateObj, {
       new: true,
     });

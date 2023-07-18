@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-export type ContactDocument = HydratedDocument<User>;
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({ versionKey: false, timestamps: true })
 export class User {
@@ -41,6 +41,6 @@ UserSchema.methods.validatePassword = async function (
   return await bcrypt.compare(password, this.password);
 };
 
-export interface UserDocument extends User {
+export interface ExtendedUserDocument extends User {
   id: string;
 }

@@ -15,17 +15,17 @@ import {
 } from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UsersService } from './users.service';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { diskStorage } from 'multer';
-import { ExtendedRequest } from 'src/common/extended-requset.interface';
+import { ExtendedRequest } from '../common/extended-requset.interface';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Public()
   @Post('register')
@@ -60,10 +60,8 @@ export class UsersController {
   }
 
   @Get()
-  async getCurrentUser(@Req() req: ExtendedRequest) {
-    const { name, email, avatar } = await this.usersService.findById(
-      req.user.id,
-    );
+  getCurrentUser(@Req() req: ExtendedRequest) {
+    const { name, email, avatar } = req.user;
     return { name, email, avatar };
   }
 
@@ -80,13 +78,13 @@ export class UsersController {
   }
 
   @Patch('update')
-  async updateUser(@Req() req: ExtendedRequest, @Body() body: UpdateUserDto) {
-    return this.usersService.updateName(req.user.id, body.name);
+  async updateUser(@Req() req: ExtendedRequest, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateUser(req.user.id, updateUserDto);
   }
 
   @Get('verify/:verifyToken')
   @Public()
-  async verify(@Param('verifyToken') verifyToke: string) {
-    return await this.usersService.verifyUser(verifyToke);
+  async verify(@Param('verifyToken') verifyToken: string) {
+    return await this.usersService.verifyUser(verifyToken);
   }
 }
