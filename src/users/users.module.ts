@@ -6,6 +6,7 @@ import { User, UserSchema } from './schemas/user.schema';
 import { UsersRepository } from './users.repository';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { EmailModule } from '../email/email.module';
+import { IsUserAlreadyExistConstraint } from './helpers/users.validators';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { EmailModule } from '../email/email.module';
     EmailModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository],
+  providers: [UsersService, UsersRepository, IsUserAlreadyExistConstraint],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

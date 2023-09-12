@@ -81,9 +81,9 @@ describe('UsersService', () => {
   });
 
   it('should register user', async () => {
-    const { name, email, password } = RegisterUserDtoMockFactory();
+    const { name, email, password, verifyToken } = RegisterUserDtoMockFactory();
 
-    const result = await usersService.register({ name, email, password });
+    const result = await usersService.register({ name, email, password, verifyToken });
     expect(result).toHaveProperty('name');
     expect(result).toHaveProperty('avatar');
     expect(mockUsersRepository.findByField).toHaveBeenCalledWith({ email });
@@ -119,7 +119,7 @@ describe('UsersService', () => {
     const file = MulterFileMockFactory();
     const updateObj = { avatar: 'secure_url', cloudAvatarId: 'public_id' };
 
-    expect(await usersService.updateAvatar(userId, file)).toBeDefined();
+    expect(await usersService.updateAvatar(userId, "avatar", "avatarId")).toBeDefined();
     expect(mockUsersRepository.getAvatar).toHaveBeenCalledWith(userId);
     expect(mockCloudinaryService.uploadAvatar).toHaveBeenCalledWith(file.path);
     expect(mockUsersRepository.updateUser).toHaveBeenCalledWith(

@@ -11,6 +11,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UsersService } from './users.service';
@@ -21,15 +22,35 @@ import { diskStorage } from 'multer';
 import { ExtendedRequest } from '../common/extended-requset.interface';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { EmailService } from 'src/email/email.service';
+import { nanoid } from 'nanoid';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import * as fse from 'fs-extra';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService,
+    private readonly emailService: EmailService,
+    private readonly cloudinaryService: CloudinaryService,) { }
 
   @Public()
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
-    return await this.usersService.register(registerUserDto);
+    const { email, name } = registerUserDto;
+    const verifyToken = nanoid();
+
+    try {
+      await this.emailService.sendEmail(verifyToken, name, email);
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: users.service.ts:32 ~ UsersService ~ register ~ error:',
+        error.message,
+      );
+      throw new BadRequestException("Problem with email service. Email may be invalid.")
+    }
+
+
+    return await this.usersService.register({ ...registerUserDto, verifyToken });
   }
 
   @Patch('avatar')
@@ -55,13 +76,32 @@ export class UsersController {
     avatar: Express.Multer.File,
     @Req() req: ExtendedRequest,
   ) {
-    return await this.usersService.updateAvatar(req.user.id, avatar);
+
+    const { secure_url, public_id } = await this.cloudinaryService.uploadAvatar(
+      avatar.path,
+    );
+    const { oldAvatar } = await this.usersService.updateAvatar(req.user.id, secure_url, public_id)
+
+    if (oldAvatar) {
+      this.cloudinaryService.deleteAvatar(oldAvatar);
+    }
+
+    try {
+      fse.remove(avatar.path);
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: users.service.ts:60 ~ UsersService ~ updateAvatar ~ error:',
+        error,
+      );
+    }
+
+    return { newAvatar: secure_url };
   }
 
   @Get()
   getCurrentUser(@Req() req: ExtendedRequest) {
-    const { name, email, avatar } = req.user;
-    return { name, email, avatar };
+    const { name, email, avatar, id } = req.user;
+    return { name, email, avatar, id };
   }
 
   @Patch('password')

@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
   async register(registerUserObj: RegisterUserExtended) {
     const user = await this.userModel.create(registerUserObj);

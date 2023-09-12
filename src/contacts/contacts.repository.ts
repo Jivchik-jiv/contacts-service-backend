@@ -9,7 +9,7 @@ import { UpdateContactInterface } from './contacts.entities';
 export class ContactsRepository {
   constructor(
     @InjectModel(Contact.name) private contactModel: Model<Contact>,
-  ) {}
+  ) { }
 
   async create(createContactDto: CreateContactDto, userId: string) {
     const contact = await this.contactModel.create({

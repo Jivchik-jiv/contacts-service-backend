@@ -10,8 +10,8 @@ export class UpdateContactDto extends PartialType(CreateContactDto) {
   readonly phone: string;
 
   @IsOptional()
-  readonly email: string;
+  readonly email: string | null;
 
   @IsOptional()
-  readonly company: string;
+  readonly company: string | null;
 }

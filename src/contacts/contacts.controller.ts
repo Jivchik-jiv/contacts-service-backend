@@ -20,6 +20,8 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ExtendedRequest } from '../common/extended-requset.interface';
+import * as fse from 'fs-extra';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 interface FindAllQuery {
   limit: number;
@@ -28,7 +30,7 @@ interface FindAllQuery {
 
 @Controller('contacts')
 export class ContactsController {
-  constructor(private readonly contactsService: ContactsService) {}
+  constructor(private readonly contactsService: ContactsService, private readonly cloudinaryService: CloudinaryService) { }
 
   @Post()
   async create(
@@ -84,7 +86,27 @@ export class ContactsController {
     avatar: Express.Multer.File,
     @Param('id') id: string,
   ) {
-    return await this.contactsService.updateAvatar(req.user.id, id, avatar);
+
+    const { secure_url, public_id } = await this.cloudinaryService.uploadAvatar(
+      avatar.path,
+    );
+
+    const { oldAvatar } = await this.contactsService.updateAvatar(req.user.id, id, secure_url, public_id);
+
+    if (oldAvatar) {
+      this.cloudinaryService.deleteAvatar(oldAvatar);
+    }
+
+    try {
+      fse.remove(avatar.path);
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: users.service.ts:60 ~ UsersService ~ updateAvatar ~ error:',
+        error,
+      );
+    }
+
+    return { newAvatar: secure_url };
   }
 
   @Patch(':id/friends')

@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
     private jwtService: JwtService,
     private reflector: Reflector,
     private usersService: UsersService,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -42,6 +42,7 @@ export class AuthGuard implements CanActivate {
       });
 
       user = await this.usersService.findById(payload.id);
+
     } catch (error) {
       throw new UnauthorizedException();
     }
@@ -54,7 +55,7 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException('Email is not verified');
     }
 
-    request['user'] = payload;
+    request['user'] = user;
 
     return true;
   }

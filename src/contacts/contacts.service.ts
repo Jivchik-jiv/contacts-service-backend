@@ -1,16 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { ContactsRepository } from './contacts.repository';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import * as fse from 'fs-extra';
 
 @Injectable()
 export class ContactsService {
   constructor(
     private readonly contactsRepository: ContactsRepository,
-    private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async create(userId: string, createContactDto: CreateContactDto) {
     return await this.contactsRepository.create(createContactDto, userId);
@@ -31,35 +28,26 @@ export class ContactsService {
   }
 
   async update(userId: string, id: string, updateContactDto: UpdateContactDto) {
+
     return await this.contactsRepository.update(userId, id, updateContactDto);
   }
 
-  async updateAvatar(userId: string, id: string, avatar: Express.Multer.File) {
-    const oldAvatar = await this.contactsRepository.findOne(userId, id);
+  async updateAvatar(userId: string, id: string, avatar: string, cloudAvatarId: string) {
 
-    const { secure_url, public_id } = await this.cloudinaryService.uploadAvatar(
-      avatar.path,
-    );
-
-    await this.contactsRepository.update(userId, id, {
-      avatar: secure_url,
-      cloudAvatarId: public_id,
-    });
-
-    if (oldAvatar.cloudAvatarId) {
-      this.cloudinaryService.deleteAvatar(oldAvatar.cloudAvatarId);
-    }
-
+    let oldAvatar: any;
+    let contact: any;
     try {
-      fse.remove(avatar.path);
+      oldAvatar = await this.contactsRepository.findOne(userId, id);
+      contact = await this.contactsRepository.update(userId, id, {
+        avatar,
+        cloudAvatarId
+      });
     } catch (error) {
-      console.log(
-        '🚀 ~ file: users.service.ts:60 ~ UsersService ~ updateAvatar ~ error:',
-        error,
-      );
+      console.log("🚀 ~ file: contacts.service.ts:53 ~ ContactsService ~ updateAvatar ~ error:", error)
+      throw new InternalServerErrorException("Error while updating avatar.")
     }
 
-    return { newAvatar: secure_url };
+    return { oldAvatar: oldAvatar.cloudAvatarId, contact };
   }
 
   async updateFriends(userId: string, id: string, isFriend: boolean) {

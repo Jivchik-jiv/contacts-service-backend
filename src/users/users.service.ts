@@ -1,54 +1,26 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { RegisterUserDto } from './dto/register-user.dto';
 import * as gravatar from 'gravatar';
-import { nanoid } from 'nanoid';
 import { hashPassword } from '../utils/bcrypt';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import * as fse from 'fs-extra';
-import { EmailService } from '../email/email.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RegisterUserExtended } from './users.entities';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly cloudinaryService: CloudinaryService,
-    private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
-  async register(registerUserDto: RegisterUserDto) {
-    const { email, name, password } = registerUserDto;
-
-    const user = await this.usersRepository.findByField({ email });
-
-    if (user) {
-      throw new ConflictException(
-        'This email is already associated with an account.',
-      );
-    }
-
-    const verifyToken = nanoid();
-    try {
-      await this.emailService.sendEmail(verifyToken, name, email);
-    } catch (error) {
-      console.log(
-        '🚀 ~ file: users.service.ts:32 ~ UsersService ~ register ~ error:',
-        error.message,
-      );
-      return 'Looks like email is wrong';
-    }
-    const hashPass = hashPassword(password);
+  async register(registerUserObj: RegisterUserExtended) {
+    const hashPass = hashPassword(registerUserObj.password);
 
     const newUser = await this.usersRepository.register({
-      name,
-      email,
-      verifyToken,
+      ...registerUserObj,
       password: hashPass,
     });
 
     if (newUser) {
-      newUser.avatar = await gravatar.url(
+      newUser.avatar = gravatar.url(
         newUser.email,
         { s: '250', d: 'robohash' },
         true,
@@ -62,41 +34,48 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    return await this.usersRepository.findByField({ email });
+    const user = await this.usersRepository.findByField({ email });
+
+    if (!user) {
+      return null;
+    }
+
+    if (!user.avatar) {
+      user.avatar = gravatar.url(user.email, { s: '250', d: 'robohash' }, true);
+    }
+    return user;
   }
 
   async findById(userId: string) {
     const user = await this.usersRepository.findByField({ _id: userId });
-    user.avatar = gravatar.url(user.email, { s: '250', d: 'robohash' }, true);
+
+    if (!user) {
+      return null;
+    }
+
+    if (!user.avatar) {
+      user.avatar = gravatar.url(user.email, { s: '250', d: 'robohash' }, true);
+    }
+
     return user;
   }
 
-  async updateAvatar(userId: string, avatar: Express.Multer.File) {
-    const oldAvatar = await this.usersRepository.getAvatar(userId);
+  async updateAvatar(userId: string, avatar: string, cloudAvatarId: string) {
 
-    const { secure_url, public_id } = await this.cloudinaryService.uploadAvatar(
-      avatar.path,
-    );
-
-    await this.usersRepository.updateUser(userId, {
-      avatar: secure_url,
-      cloudAvatarId: public_id,
-    });
-
-    if (oldAvatar.cloudAvatarId) {
-      this.cloudinaryService.deleteAvatar(oldAvatar.cloudAvatarId);
-    }
-
+    let oldAvatar: any;
+    let user: any;
     try {
-      fse.remove(avatar.path);
+      oldAvatar = await this.usersRepository.getAvatar(userId);
+      user = await this.usersRepository.updateUser(userId, {
+        avatar,
+        cloudAvatarId,
+      });
     } catch (error) {
-      console.log(
-        '🚀 ~ file: users.service.ts:60 ~ UsersService ~ updateAvatar ~ error:',
-        error,
-      );
+      console.log("🚀 ~ file: users.service.ts:81 ~ UsersService ~ updateAvatar ~ error:", error)
+      throw new InternalServerErrorException("Error while updating avatar.")
     }
+    return { oldAvatar: oldAvatar.cloudAvatarId, user };
 
-    return { newAvatar: secure_url };
   }
 
   async updatePassword(
@@ -107,7 +86,7 @@ export class UsersService {
     const user = await this.usersRepository.findByField({ _id: userId });
 
     if (user) {
-      const passValid = user.validatePassword(oldPassword);
+      const passValid = await user.validatePassword(oldPassword);
 
       if (passValid) {
         const hashPass = hashPassword(newPassword);
@@ -126,7 +105,8 @@ export class UsersService {
   }
 
   async updateUser(userId: string, updateUserDto: UpdateUserDto) {
-    await this.usersRepository.updateUser(userId, { ...updateUserDto });
+    const { name, email, id, avatar } = await this.usersRepository.updateUser(userId, { ...updateUserDto });
+    return { name, email, id, avatar };
   }
 
   async verifyUser(verifyToken: string) {

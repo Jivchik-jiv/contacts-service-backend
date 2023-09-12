@@ -7,6 +7,8 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
+import { UsersService } from '../users/users.service';
+import { IsCredentialsCorrectConstraint } from './helpers/auth.validators';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { AuthGuard } from './auth.guard';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    IsCredentialsCorrectConstraint
   ],
 })
-export class AuthModule {}
+export class AuthModule { }

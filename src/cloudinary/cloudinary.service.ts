@@ -14,10 +14,16 @@ export class CloudinaryService {
   }
 
   async deleteAvatar(id: string) {
-    const result = await v2.uploader.destroy(id);
-    console.log(
-      '🚀 ~ file: cloudinary.service.ts:18 ~ CloudinaryService ~ deleteAvatar ~ result:',
-      result,
-    );
+    try {
+      const result = await v2.uploader.destroy(id);
+      console.log(
+        '🚀 ~ file: cloudinary.service.ts:18 ~ CloudinaryService ~ deleteAvatar ~ result:',
+        result,
+      );
+    } catch (error) {
+      console.log("🚀 ~ file: cloudinary.service.ts:24 ~ CloudinaryService ~ deleteAvatar ~ error:", error)
+
+    }
+
   }
 }
